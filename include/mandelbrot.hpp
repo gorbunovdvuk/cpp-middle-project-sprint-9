@@ -24,12 +24,6 @@ public:
         RenderSettings settings_;
         MandelbrotRenderer &renderer_;
 
-        template<typename sender_t>
-        using operation_state_t = decltype(stdexec::connect(
-            std::move(std::declval<sender_t>()),
-            std::move(std::declval<Receiver>())
-        ));
-
         std::any operation_state_;
 
         void start() noexcept {
@@ -40,7 +34,7 @@ public:
                             st->need_rerender = false;
                             return r;
                         });
-                    using ptr_type = operation_state_t<decltype(snd)>;
+                    using ptr_type = stdexec::connect_result_t<decltype(snd), decltype(receiver_)>;
                     operation_state_ = std::shared_ptr<ptr_type>(new (ptr_type) (stdexec::connect(std::move(snd), std::move(receiver_))));
                     stdexec::start(*std::any_cast<std::shared_ptr<ptr_type>>(operation_state_));
                 } else {
