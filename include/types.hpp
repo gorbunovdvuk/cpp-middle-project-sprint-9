@@ -5,7 +5,7 @@
 
 #include "mandelbrot_fractal_utils.hpp"
 
-const constexpr std::uint32_t THREAD_POOL_SIZE{8};
+constexpr std::uint32_t THREAD_POOL_SIZE{8};
 
 using PixelMatrix = std::vector<std::vector<std::uint32_t>>;
 using ColorMatrix = std::vector<std::vector<mandelbrot::RgbColor>>;
