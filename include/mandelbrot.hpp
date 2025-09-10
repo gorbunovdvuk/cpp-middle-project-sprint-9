@@ -35,7 +35,7 @@ public:
                             return r;
                         });
                     using ptr_type = stdexec::connect_result_t<decltype(snd), decltype(receiver_)>;
-                    operation_state_ = std::shared_ptr<ptr_type>(new (ptr_type) (stdexec::connect(std::move(snd), std::move(receiver_))));
+                    operation_state_ = std::shared_ptr<ptr_type>(new ptr_type(stdexec::connect(std::move(snd), std::move(receiver_))));
                     stdexec::start(*std::any_cast<std::shared_ptr<ptr_type>>(operation_state_));
                 } else {
                     RenderResult out;
