@@ -13,8 +13,8 @@ class GeometryAppConan(ConanFile):
         self.tool_requires("cmake/3.30.0")
         self.requires("ogg/1.3.5")
         self.requires("vorbis/1.3.7")
-        self.requires("flac/1.4.3")
-        self.requires("freetype/2.12.1")
+        self.requires("flac/1.5.0")
+        self.requires("freetype/2.13.3")
     
     def layout(self):
         self.folders.source = "."
