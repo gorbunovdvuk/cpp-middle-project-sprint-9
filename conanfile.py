@@ -11,6 +11,10 @@ class GeometryAppConan(ConanFile):
     def requirements(self):
         self.requires("gtest/1.13.0")
         self.tool_requires("cmake/3.30.0")
+        self.requires("ogg/1.3.5")
+        self.requires("vorbis/1.3.7")
+        self.requires("flac/1.5.0")
+        self.requires("freetype/2.13.3")
     
     def layout(self):
         self.folders.source = "."

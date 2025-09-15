@@ -2,13 +2,53 @@
 
 #include "mandelbrot_renderer.hpp"
 
+#include <any>
+
 class CalculateMandelbrotAsyncSender {
 public:
-    explicit CalculateMandelbrotAsyncSender(AppState &state, RenderSettings render_settings,
-                                            MandelbrotRenderer &renderer)
-        : state_(state), render_settings_{render_settings}, renderer_{renderer} {}
+    using sender_concept = stdexec::sender_t;
+    using completion_signatures = stdexec::completion_signatures<
+        stdexec::set_value_t(RenderResult),
+        stdexec::set_error_t(std::exception_ptr),
+        stdexec::set_stopped_t()
+    >;
 
-    /* Ваш код здесь  */
+    explicit CalculateMandelbrotAsyncSender(AppState &state, RenderSettings render_settings, MandelbrotRenderer &renderer);
+
+    template <typename Receiver>
+    struct OperationState {
+        using operation_state_concept = stdexec::operation_state_t;
+
+        Receiver receiver_;
+        AppState &state_;
+        RenderSettings settings_;
+        MandelbrotRenderer &renderer_;
+
+        std::any operation_state_;
+
+        void start() noexcept {
+            try {
+                if (state_.need_rerender) {
+                    auto snd = renderer_.template RenderAsync<8>(state_.viewport, settings_) |
+                        stdexec::then([st = &state_](RenderResult&& r) {
+                            st->need_rerender = false;
+                            return r;
+                        });
+                    using ptr_type = stdexec::connect_result_t<decltype(snd), decltype(receiver_)>;
+                    operation_state_ = std::shared_ptr<ptr_type>(new ptr_type(stdexec::connect(std::move(snd), std::move(receiver_))));
+                    stdexec::start(*std::any_cast<std::shared_ptr<ptr_type>>(operation_state_));
+                } else {
+                    stdexec::set_value(std::move(receiver_), RenderResult{.viewport = state_.viewport, .settings = settings_, .render_time = std::chrono::milliseconds(0)});
+                }
+            } catch (...) {
+                stdexec::set_error(std::move(receiver_), std::current_exception());
+            }
+        }
+    };
+
+    auto connect(auto receiver) noexcept {
+        return OperationState<decltype(receiver)>{std::move(receiver), state_, render_settings_, renderer_};
+    }
 
 private:
     RenderSettings render_settings_;

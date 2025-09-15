@@ -14,6 +14,7 @@
 #include "sfml_renderer.hpp"
 
 using namespace std::chrono_literals;
+
 class FrameClock {
 public:
     FrameClock() { Reset(); }
@@ -27,28 +28,30 @@ private:
 
 class WaitForFPS {
 public:
+    WaitForFPS(FrameClock& frame_clock, uint32_t fps) : frame_clock_(frame_clock), frame_time_(1s / std::max(1u, fps)) {}
 
+    void operator()() const noexcept {
+        if (auto elapsed = frame_clock_.GetFrameTime(); elapsed < frame_time_) {
+            std::this_thread::sleep_for(frame_time_ - elapsed);
+        }
+        frame_clock_.Reset();
+    }
+
+private:
+    FrameClock& frame_clock_;
+    std::chrono::milliseconds frame_time_;
 };
 
 class MandelbrotApp {
-private:
-    RenderSettings render_settings_{.width = 800, .height = 600, .max_iterations = 100, .escape_radius = 2.0};
-
-    sf::RenderWindow window_;
-    sf::Image image_;
-    sf::Texture texture_;
-    sf::Sprite sprite_;
-    MandelbrotRenderer renderer_;
-    AppState state_;
-
 public:
-    MandelbrotApp()
-        : window_{sf::VideoMode{render_settings_.width, render_settings_.height}, "Mandelbrot Fractal"},
-          renderer_{THREAD_POOL_SIZE} {
-
-        image_.create(render_settings_.width, render_settings_.height);
-        texture_.create(render_settings_.width, render_settings_.height);
-
+    MandelbrotApp(RenderSettings render_settings):
+        render_settings_(render_settings),
+        window_{sf::VideoMode{sf::Vector2u{render_settings_.width, render_settings_.height}}, "Mandelbrot Fractal"},
+        image_{sf::Vector2u{render_settings_.width, render_settings_.height}, sf::Color::Black},
+        texture_{sf::Vector2u{render_settings_.width, render_settings_.height}},
+        sprite_(texture_),
+        renderer_{THREAD_POOL_SIZE}
+    {
         window_.setKeyRepeatEnabled(false);
     }
 
@@ -70,11 +73,26 @@ public:
 
         stdexec::sync_wait(std::move(repeated_pipeline));
     }
+
+private:
+    RenderSettings render_settings_;
+    sf::RenderWindow window_;
+    sf::Image image_;
+    sf::Texture texture_;
+    sf::Sprite sprite_;
+    MandelbrotRenderer renderer_;
+    AppState state_;
 };
 
 int main() {
     try {
-        MandelbrotApp app;
+        RenderSettings settings{
+            .width = 800,
+            .height = 600,
+            .max_iterations = 100,
+            .escape_radius = 2.0,
+        };
+        MandelbrotApp app(settings);
         app.Run();
     } catch (const std::exception &e) {
         std::println("Error: {}", e.what());
