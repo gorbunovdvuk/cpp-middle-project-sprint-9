@@ -29,8 +29,8 @@ struct RgbColors {
     static constexpr RgbColor BLACK = RgbColor{0, 0, 0};
 };
 
-[[nodiscard]] std::uint32_t CalculateIterationsForPoint(const Complex &c, std::uint32_t max_iterations,
-                                                                  double escape_radius) noexcept;
+[[nodiscard]] std::uint32_t CalculateIterationsForPoint(const Complex &c, const std::uint32_t max_iterations,
+                                                                  const double escape_radius) noexcept;
 
 [[nodiscard]] Complex Pixel2DToComplex(std::uint32_t x, std::uint32_t y, const ViewPort &viewport,
                                                  const std::uint32_t screen_width,

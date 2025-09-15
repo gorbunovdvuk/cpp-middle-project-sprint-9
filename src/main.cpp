@@ -44,7 +44,9 @@ private:
 
 class MandelbrotApp {
 public:
-    MandelbrotApp(): window_{sf::VideoMode{sf::Vector2u{render_settings_.width, render_settings_.height}}, "Mandelbrot Fractal"},
+    MandelbrotApp(RenderSettings render_settings):
+        render_settings_(render_settings),
+        window_{sf::VideoMode{sf::Vector2u{render_settings_.width, render_settings_.height}}, "Mandelbrot Fractal"},
         image_{sf::Vector2u{render_settings_.width, render_settings_.height}, sf::Color::Black},
         texture_{sf::Vector2u{render_settings_.width, render_settings_.height}},
         sprite_(texture_),
@@ -84,7 +86,13 @@ private:
 
 int main() {
     try {
-        MandelbrotApp app;
+        RenderSettings settings{
+            .width = 800,
+            .height = 600,
+            .max_iterations = 100,
+            .escape_radius = 2.0,
+        };
+        MandelbrotApp app(settings);
         app.Run();
     } catch (const std::exception &e) {
         std::println("Error: {}", e.what());

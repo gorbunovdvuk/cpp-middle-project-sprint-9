@@ -38,11 +38,7 @@ public:
                     operation_state_ = std::shared_ptr<ptr_type>(new ptr_type(stdexec::connect(std::move(snd), std::move(receiver_))));
                     stdexec::start(*std::any_cast<std::shared_ptr<ptr_type>>(operation_state_));
                 } else {
-                    RenderResult out;
-                    out.viewport = state_.viewport;
-                    out.settings = settings_;
-                    out.render_time = std::chrono::milliseconds{0};
-                    stdexec::set_value(std::move(receiver_), std::move(out));
+                    stdexec::set_value(std::move(receiver_), RenderResult{.viewport = state_.viewport, .settings = settings_, .render_time = std::chrono::milliseconds(0)});
                 }
             } catch (...) {
                 stdexec::set_error(std::move(receiver_), std::current_exception());

@@ -42,7 +42,7 @@ file(GLOB SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 list(REMOVE_ITEM SRC_FILES "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
 # Создаём статическую библиотеку
-add_library(${PROJECT_NAME}_imp ${SRC_FILES} ${HEADER_FILES})
+add_library(${PROJECT_NAME}_imp STATIC ${SRC_FILES} ${HEADER_FILES})
 
 # Добавляем в проект используемые сторонние PRIVATE
 target_include_directories(${PROJECT_NAME}_imp PUBLIC

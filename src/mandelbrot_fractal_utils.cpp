@@ -2,7 +2,7 @@
 
 namespace mandelbrot {
 
-std::uint32_t CalculateIterationsForPoint(const Complex &c, std::uint32_t max_iterations, double escape_radius) noexcept {
+std::uint32_t CalculateIterationsForPoint(const Complex &c, const std::uint32_t max_iterations, const double escape_radius) noexcept {
 
     Complex z{0.0, 0.0};
     const double escape_radius_squared = escape_radius * escape_radius;
@@ -20,6 +20,9 @@ Complex Pixel2DToComplex(std::uint32_t x, std::uint32_t y, const ViewPort &viewp
                                                  const std::uint32_t screen_width,
                                                  const std::uint32_t screen_height) noexcept {
 
+    if (screen_width == 0 || screen_height == 0) {
+        return Complex{0.0, 0.0};
+    }
     const double real = viewport.x_min + (static_cast<double>(x) / screen_width) * viewport.width();
     const double imag = viewport.y_min + (static_cast<double>(y) / screen_height) * viewport.height();
     return Complex{real, imag};
@@ -28,7 +31,7 @@ Complex Pixel2DToComplex(std::uint32_t x, std::uint32_t y, const ViewPort &viewp
 RgbColor IterationsToColor(std::uint32_t iterations, std::uint32_t max_iterations) noexcept {
 
     // Точка принадлежит множеству Мандельброта
-    if (iterations == max_iterations) {
+    if (iterations == 0 || iterations == max_iterations) {
         return RgbColors::BLACK;
     }
 

@@ -38,9 +38,7 @@ public:
             stdexec::let_value([=](auto t0) {
                 return std::move(whenAllSender) |
                     stdexec::then([=](auto&&... parts) {
-                        RenderResult result;
-                        result.viewport = viewport;
-                        result.settings = settings;
+                        RenderResult result{.viewport = viewport, .settings = settings};
                         result.pixel_data.assign(settings.height, std::vector<std::uint32_t>(settings.width));
                         result.color_data.assign(settings.height, std::vector<mandelbrot::RgbColor>(settings.width));
                         (

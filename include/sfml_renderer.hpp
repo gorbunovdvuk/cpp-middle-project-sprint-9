@@ -15,35 +15,36 @@ public:
         stdexec::set_stopped_t()
     >;
 
-    template <typename Receiver>
-    struct OperationState {
-        using operation_state_concept = stdexec::operation_state_t;
+    class OperationStateImpl {
+    public:
+        OperationStateImpl(RenderResult render_result, sf::Image &image, sf::Texture &texture, sf::Sprite &sprite, sf::RenderWindow &window, RenderSettings render_settings):
+            render_result_(std::move(render_result)), image_(image), texture_(texture), sprite_(sprite), window_(window), render_settings_(std::move(render_settings)) {}
 
-        Receiver receiver_;
+    protected:
+        void run();
+
+    private:
         RenderResult render_result_;
         sf::Image &image_;
         sf::Texture &texture_;
         sf::Sprite &sprite_;
         sf::RenderWindow &window_;
         RenderSettings render_settings_;
+    };
+
+    template <typename Receiver>
+    struct OperationState : public OperationStateImpl {
+        using operation_state_concept = stdexec::operation_state_t;
+
+        OperationState(Receiver receiver, RenderResult render_result, sf::Image &image, sf::Texture &texture, sf::Sprite &sprite, sf::RenderWindow &window, RenderSettings render_settings):
+            OperationStateImpl(std::move(render_result), image, texture, sprite, window, std::move(render_settings)),
+            receiver_(std::move(receiver)) {}
+
+        Receiver receiver_;
 
         void start() noexcept {
             try {
-                if (!render_result_.color_data.empty()) {
-                    auto w = static_cast<uint32_t>(render_result_.color_data.begin()->size());
-                    auto h = static_cast<uint32_t>(render_result_.color_data.size());
-                    for (uint32_t y = 0; y < h; ++y) {
-                        for (uint32_t x = 0; x < w; ++x) {
-                            auto c = render_result_.color_data[y][x];
-                            image_.setPixel(sf::Vector2u{x, y}, sf::Color{c.r, c.g, c.b});
-                        }
-                    }
-                    texture_.update(image_);
-                    sprite_.setTexture(texture_);
-                }
-                window_.clear();
-                window_.draw(sprite_);
-                window_.display();
+                OperationStateImpl::run();
                 stdexec::set_value(std::move(receiver_));
             } catch (...) {
                 stdexec::set_error(std::move(receiver_), std::current_exception());

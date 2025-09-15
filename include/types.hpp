@@ -11,10 +11,10 @@ using PixelMatrix = std::vector<std::vector<std::uint32_t>>;
 using ColorMatrix = std::vector<std::vector<mandelbrot::RgbColor>>;
 
 struct RenderSettings {
-    std::uint32_t width{800};
-    std::uint32_t height{600};
-    std::uint32_t max_iterations{100};
-    double escape_radius{2.0};
+    std::uint32_t width;
+    std::uint32_t height;
+    std::uint32_t max_iterations;
+    double escape_radius;
 };
 
 struct PixelRegion {
